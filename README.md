@@ -52,13 +52,30 @@ Haz clic en cualquier neurona del diagrama sináptico para abrir el **Microscopi
 
 ---
 
-### 6. 🎓 Academia & Retos Didácticos
+### 6. 💬 Módulo LLM & Tokens: Transformers y Generación de Lenguaje
+- **Tokenización en Vivo (BPE)**: Visualiza el troceado de texto en subpalabras, caracteres de espacio inicial (`·`) y su mapeo al diccionario de IDs numéricos.
+- **Arcos de Auto-Atención (Self-Attention)**: Pasa el ratón sobre cualquier token para ver los arcos SVG curvados que muestran a qué palabras atiende el modelo para desambiguar el significado contextual (ej. *banco* en el contexto de un *parque* frente al contexto de un *préstamo* financiero).
+- **Predicción de Siguiente Token y Bucle Autorregresivo**: Explora la ruleta de probabilidades Softmax y pulsa *"Predecir Siguiente Token"* o *"Auto-Generar"* para ver al LLM escribir palabra a palabra en tiempo real.
+
+---
+
+### 7. 🎓 Academia & Retos Didácticos
 Cuatro misiones prácticas para resolver con un clic:
 1. **La Trampa de la Línea Recta (Perceptrón)**: Demuestra por qué 0 capas ocultas no pueden separar regiones concéntricas.
 2. **El Poder de la No Linealidad y ReLU**: Añade capas ocultas y observa el plegado del espacio.
 3. **El Monstruo del Sobreajuste (Overfitting)**: Experimenta qué ocurre al usar demasiadas neuronas con ruido y cómo la regularización L2 devuelve la capacidad de generalización.
 4. **La Física de los Coches Autónomos**: Ajusta hiperparámetros para modelar la distancia de frenado cuadrática.
 - **Glosario Visual**: Definiciones y analogías de la vida real para *Backpropagation*, *Gradiente Descendente*, *Learning Rate*, *Bias* y *Pesos*.
+
+---
+
+### 📖 Guía Interna para el Profesor
+Consulta el archivo **[`GUIA_PROFESOR.md`](./GUIA_PROFESOR.md)** para acceder al manual pedagógico completo con:
+- Origen y justificación científica de cada dataset (benchmarks de Kaggle, UCI y leyes físicas).
+- Cuál es la mejor función de activación para cada problema y por qué.
+- Por qué introducimos ruido y cómo demostrar el sobreajuste (*overfitting*).
+- Cómo explicar la tokenización y la auto-atención en clase.
+- Estructura y tiempos recomendados para una clase de 60 a 90 minutos con preguntas frecuentes resueltas.
 
 ---
 
