@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeuroLab - Playground Interactivo de Redes Neuronales con Casos Reales</title>
+  <meta name="description" content="Aprende y experimenta visualmente cómo funciona una red neuronal con problemas del mundo real: medicina, finanzas, coches autónomos, visión por computador (CNN) y secuencias temporales (RNN).">
+  
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome 6 Free -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <!-- Header y Navegación Principal -->
+  <header class="main-header">
+    <div class="header-brand">
+      <div class="brand-logo-glow">
+        <i class="fa-solid fa-brain"></i>
+      </div>
+      <div>
+        <h1 class="brand-title">NeuroLab</h1>
+        <span class="brand-subtitle">Playground de Inteligencia Artificial & Casos Reales</span>
+      </div>
+    </div>
+
+    <!-- Pestañas de Navegación por Tipos de Redes -->
+    <nav class="nav-tabs" role="tablist">
+      <button class="nav-tab active" data-tab="mlp" id="tab-btn-mlp" role="tab" aria-selected="true">
+        <i class="fa-solid fa-network-wired"></i>
+        <span>Playground MLP</span>
+      </button>
+      <button class="nav-tab" data-tab="cnn" id="tab-btn-cnn" role="tab" aria-selected="false">
+        <i class="fa-solid fa-eye"></i>
+        <span>Visión CNN</span>
+      </button>
+      <button class="nav-tab" data-tab="rnn" id="tab-btn-rnn" role="tab" aria-selected="false">
+        <i class="fa-solid fa-clock-rotate-left"></i>
+        <span>Secuencias RNN</span>
+      </button>
+      <button class="nav-tab" data-tab="academy" id="tab-btn-academy" role="tab" aria-selected="false">
+        <i class="fa-solid fa-graduation-cap"></i>
+        <span>Academia & Retos</span>
+      </button>
+    </nav>
+
+    <!-- Botones de Acción Globales -->
+    <div class="header-actions">
+      <button id="btn-sound-toggle" class="btn-icon" title="Activar/Silenciar sonido de simulación">
+        <i class="fa-solid fa-volume-high" id="sound-icon"></i>
+      </button>
+      <button id="btn-quick-guide" class="btn-outline-sm" title="Guía rápida para principiantes">
+        <i class="fa-solid fa-circle-question"></i>
+        <span>¿Cómo empezar?</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Contenedor Principal de Vistas -->
+  <main class="app-main-content">
+
+    <!-- ==================== VISTA 1: PLAYGROUND MLP ==================== -->
+    <section id="view-mlp" class="view-panel active" role="tabpanel">
+      
+      <!-- Barra Superior de Control de Entrenamiento (Estilo Playground Moderno) -->
+      <div class="playground-control-bar">
+        <div class="sim-ctrl-group">
+          <button id="btn-play-pause" class="btn-play" title="Iniciar / Pausar entrenamiento continuo">
+            <i class="fa-solid fa-play" id="play-icon"></i>
+            <span id="play-text">Entrenar</span>
+          </button>
+          <button id="btn-step" class="btn-step" title="Ejecutar exactamente 1 época paso a paso">
+            <i class="fa-solid fa-forward-step"></i>
+            <span>Paso a Paso</span>
+          </button>
+          <button id="btn-reset" class="btn-reset" title="Reiniciar pesos de la red a valores aleatorios">
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
+          <div class="epoch-indicator">
+            <span class="epoch-label">Época:</span>
+            <span class="epoch-number" id="epoch-counter">0</span>
+          </div>
+        </div>
+
+        <div class="hyperparam-group">
+          <!-- Selector de Tasa de Aprendizaje -->
+          <div class="param-item">
+            <label for="select-lr">Learning Rate (α):</label>
+            <select id="select-lr" class="custom-select">
+              <option value="0.001">0.001 (Lento y seguro)</option>
+              <option value="0.01">0.01 (Moderado)</option>
+              <option value="0.03" selected>0.03 (Recomendado)</option>
+              <option value="0.08">0.08 (Rápido)</option>
+              <option value="0.2">0.20 (Agresivo)</option>
+              <option value="0.8">0.80 (Inestable)</option>
+            </select>
+          </div>
+
+          <!-- Selector de Activación -->
+          <div class="param-item">
+            <label for="select-activation">Activación:</label>
+            <select id="select-activation" class="custom-select">
+              <option value="relu" selected>ReLU (Estándar)</option>
+              <option value="leakyRelu">Leaky ReLU (Anti-muerte)</option>
+              <option value="tanh">Tanh (Simétrica)</option>
+              <option value="sigmoid">Sigmoide (Probabilística)</option>
+              <option value="linear">Lineal (Sin curvatura)</option>
+            </select>
+          </div>
+
+          <!-- Regularización -->
+          <div class="param-item">
+            <label for="select-reg">Regularización:</label>
+            <select id="select-reg" class="custom-select">
+              <option value="none" selected>Ninguna</option>
+              <option value="l2">L2 (Ridge - Suaviza pesos)</option>
+              <option value="l1">L1 (Lasso - Pesos cero)</option>
+            </select>
+          </div>
+
+          <!-- Tasa de Regularización -->
+          <div class="param-item">
+            <label for="select-reg-rate">Fuerza Reg (λ):</label>
+            <select id="select-reg-rate" class="custom-select">
+              <option value="0.0001">0.0001</option>
+              <option value="0.001" selected>0.001</option>
+              <option value="0.01">0.01</option>
+              <option value="0.1">0.1</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid Principal de 3 Columnas -->
+      <div class="playground-grid">
+        
+        <!-- COLUMNA 1: Problema Real y Datos -->
+        <aside class="col-panel col-data">
+          <div class="panel-card problem-selector-card">
+            <div class="card-title">
+              <i class="fa-solid fa-database"></i>
+              <span>Problema del Mundo Real</span>
+            </div>
+            
+            <div class="problem-chips" id="problem-chips-container">
+              <!-- Generado dinámicamente -->
+            </div>
+
+            <div class="problem-story-box" id="problem-story-box">
+              <div class="story-category" id="problem-cat-badge">Salud y Medicina</div>
+              <h3 class="story-title" id="problem-title">Diagnóstico de Diabetes</h3>
+              <p class="story-desc" id="problem-desc"></p>
+              
+              <div class="features-legend">
+                <div class="feat-def">
+                  <span class="feat-badge x1">X₁</span>
+                  <div class="feat-info">
+                    <strong id="feat-1-name">Nivel de Glucosa</strong>
+                    <span id="feat-1-range">70 - 220 mg/dL</span>
+                  </div>
+                </div>
+                <div class="feat-def">
+                  <span class="feat-badge x2">X₂</span>
+                  <div class="feat-info">
+                    <strong id="feat-2-name">Índice de Masa Corporal (IMC)</strong>
+                    <span id="feat-2-range">18 - 42 kg/m²</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="problem-classes" id="problem-classes-legend"></div>
+            </div>
+
+            <!-- Controles de Datos -->
+            <div class="data-adjustments">
+              <div class="range-control">
+                <div class="range-header">
+                  <span>Ruido en las mediciones:</span>
+                  <strong id="noise-display">10%</strong>
+                </div>
+                <input type="range" id="slider-noise" min="0" max="40" step="5" value="10">
+              </div>
+
+              <div class="range-control">
+                <div class="range-header">
+                  <span>Reparto Entrenamiento / Test:</span>
+                  <strong id="ratio-display">70% / 30%</strong>
+                </div>
+                <input type="range" id="slider-ratio" min="50" max="90" step="10" value="70">
+              </div>
+
+              <div class="batch-control">
+                <span>Tamaño del Lote (Batch):</span>
+                <div class="batch-buttons">
+                  <button class="btn-batch" data-batch="8">8</button>
+                  <button class="btn-batch active" data-batch="16">16</button>
+                  <button class="btn-batch" data-batch="32">32</button>
+                  <button class="btn-batch" data-batch="64">Todos</button>
+                </div>
+              </div>
+
+              <button class="btn-regenerate" id="btn-regenerate-data">
+                <i class="fa-solid fa-shuffle"></i> Regenerar Datos del Caso
+              </button>
+            </div>
+
+            <!-- Ingeniería de Características (Features adicionales) -->
+            <div class="feature-engineering-card">
+              <div class="card-subtitle">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <span>Ingeniería de Características</span>
+              </div>
+              <p class="feat-subtext">Selecciona qué transformaciones matemáticas de X₁ y X₂ recibe la red:</p>
+              <div class="feature-toggles-grid">
+                <label class="feat-checkbox">
+                  <input type="checkbox" id="feat-x1" checked>
+                  <span class="f-box">X₁</span>
+                </label>
+                <label class="feat-checkbox">
+                  <input type="checkbox" id="feat-x2" checked>
+                  <span class="f-box">X₂</span>
+                </label>
+                <label class="feat-checkbox">
+                  <input type="checkbox" id="feat-x1-sq">
+                  <span class="f-box">X₁²</span>
+                </label>
+                <label class="feat-checkbox">
+                  <input type="checkbox" id="feat-x2-sq">
+                  <span class="f-box">X₂²</span>
+                </label>
+                <label class="feat-checkbox">
+                  <input type="checkbox" id="feat-x1-x2">
+                  <span class="f-box">X₁ · X₂</span>
+                </label>
+                <label class="feat-checkbox">
+                  <input type="checkbox" id="feat-sin-x1">
+                  <span class="f-box">sen(X₁)</span>
+                </label>
+                <label class="feat-checkbox">
+                  <input type="checkbox" id="feat-sin-x2">
+                  <span class="f-box">sen(X₂)</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- COLUMNA 2: Arquitectura Sináptica de la Red (Visualizer) -->
+        <section class="col-panel col-network">
+          <div class="panel-card network-card">
+            <div id="network-visualizer-container"></div>
+          </div>
+        </section>
+
+        <!-- COLUMNA 3: Frontera de Decisión y Gráfica de Pérdida -->
+        <aside class="col-panel col-results">
+          <div class="panel-card results-card">
+            <div id="decision-boundary-container"></div>
+            <div id="loss-chart-container"></div>
+          </div>
+        </aside>
+
+      </div>
+
+      <!-- Microscopio Neuronal (Panel flotante interactivo) -->
+      <div id="neuron-microscope-container"></div>
+
+    </section>
+
+    <!-- ==================== VISTA 2: VISIÓN CNN ==================== -->
+    <section id="view-cnn" class="view-panel" role="tabpanel" style="display: none;">
+      <div id="cnn-module-container"></div>
+    </section>
+
+    <!-- ==================== VISTA 3: SECUENCIAS RNN ==================== -->
+    <section id="view-rnn" class="view-panel" role="tabpanel" style="display: none;">
+      <div id="rnn-module-container"></div>
+    </section>
+
+    <!-- ==================== VISTA 4: ACADEMIA & RETOS ==================== -->
+    <section id="view-academy" class="view-panel" role="tabpanel" style="display: none;">
+      <div id="academy-module-container"></div>
+    </section>
+
+  </main>
+
+  <!-- Modal Didáctico de Ayuda Inicial -->
+  <div id="modal-quick-guide" class="modal-backdrop" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="fa-solid fa-graduation-cap"></i>
+          <span>Guía Rápida: Cómo sacar el máximo partido a NeuroLab</span>
+        </div>
+        <button class="btn-close-modal" id="btn-close-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="guide-step">
+          <div class="step-icon">1</div>
+          <div class="step-text">
+            <strong>Elige un Problema Real:</strong>
+            <p>Selecciona a la izquierda si deseas diagnosticar diabetes, detectar fraudes bancarios o controlar el frenado de un coche autónomo. Cada problema tiene variables con significado médico o financiero real.</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="step-icon">2</div>
+          <div class="step-text">
+            <strong>Diseña la Red Neuronal:</strong>
+            <p>Usa los botones <code>[+]</code> y <code>[-]</code> en la columna central para añadir capas ocultas o neuronas. Mira cómo las líneas (sinapsis) cambian de grosor según su peso numérico.</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="step-icon">3</div>
+          <div class="step-text">
+            <strong>Dale al botón 'Entrenar' o 'Paso a Paso':</strong>
+            <p>Observa cómo la frontera de decisión a la derecha se curva en tiempo real adaptándose a los datos. Si quieres ver exactamente qué calcula una neurona en cualquier instante, ¡haz clic sobre ella para abrir el Microscopio Neuronal!</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="step-icon">4</div>
+          <div class="step-text">
+            <strong>Explora los otros tipos de redes:</strong>
+            <p>Usa la barra superior para explorar cómo una Red Convolucional (CNN) detecta bordes en imágenes médicas y cómo una Red Recurrente (RNN) analiza texto palabra por palabra con memoria interna.</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" id="btn-modal-got-it">¡Entendido, vamos a experimentar!</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
