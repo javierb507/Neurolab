@@ -6,6 +6,7 @@ import { LossChart } from './components/lossChart.js';
 import { NeuronMicroscope } from './components/neuronMicroscope.js';
 import { CNNVisualizer } from './components/cnnVisualizer.js';
 import { RNNVisualizer } from './components/rnnVisualizer.js';
+import { LLMVisualizer } from './components/llmVisualizer.js';
 import { AcademyGuide } from './components/academyGuide.js';
 import { sounds } from './components/soundEffects.js';
 
@@ -135,7 +136,11 @@ class NeuroLabApp {
     const rnnContainer = document.getElementById('rnn-module-container');
     this.rnnModule = new RNNVisualizer(rnnContainer);
 
-    // 7. Módulo Academia
+    // 7. Módulo LLM & Tokens
+    const llmContainer = document.getElementById('llm-module-container');
+    this.llmModule = new LLMVisualizer(llmContainer);
+
+    // 8. Módulo Academia
     const academyContainer = document.getElementById('academy-module-container');
     this.academyModule = new AcademyGuide(academyContainer, (mission) => this.applyMission(mission));
   }
@@ -288,7 +293,7 @@ class NeuroLabApp {
     });
 
     // Mostrar vista correspondiente
-    const views = ['mlp', 'cnn', 'rnn', 'academy'];
+    const views = ['mlp', 'cnn', 'rnn', 'llm', 'academy'];
     views.forEach(v => {
       const viewEl = document.getElementById(`view-${v}`);
       if (viewEl) {
@@ -306,6 +311,8 @@ class NeuroLabApp {
       this.cnnModule.render();
     } else if (tabKey === 'rnn' && this.rnnModule) {
       this.rnnModule.render();
+    } else if (tabKey === 'llm' && this.llmModule) {
+      this.llmModule.update();
     }
   }
 

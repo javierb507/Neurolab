@@ -43,6 +43,10 @@
         <i class="fa-solid fa-clock-rotate-left"></i>
         <span>Secuencias RNN</span>
       </button>
+      <button class="nav-tab" data-tab="llm" id="tab-btn-llm" role="tab" aria-selected="false">
+        <i class="fa-solid fa-comments"></i>
+        <span>Tokens & LLM</span>
+      </button>
       <button class="nav-tab" data-tab="academy" id="tab-btn-academy" role="tab" aria-selected="false">
         <i class="fa-solid fa-graduation-cap"></i>
         <span>Academia & Retos</span>
@@ -282,7 +286,12 @@
       <div id="rnn-module-container"></div>
     </section>
 
-    <!-- ==================== VISTA 4: ACADEMIA & RETOS ==================== -->
+    <!-- ==================== VISTA 4: TOKENS & LLM ==================== -->
+    <section id="view-llm" class="view-panel" role="tabpanel" style="display: none;">
+      <div id="llm-module-container"></div>
+    </section>
+
+    <!-- ==================== VISTA 5: ACADEMIA & RETOS ==================== -->
     <section id="view-academy" class="view-panel" role="tabpanel" style="display: none;">
       <div id="academy-module-container"></div>
     </section>
