@@ -1,6 +1,12 @@
 # 🎓 Guión Docente: NeuroLab
 ## Manual del Profesor para Clases de Redes Neuronales e Inteligencia Artificial
 
+<div align="center">
+
+🌐 **[Read in English / Versión en Inglés (TEACHER_GUIDE.md)](./TEACHER_GUIDE.md)** | 🏠 **[README Principal](./README.md)** | 🇪🇸 **[README en Español](./README.es.md)**
+
+</div>
+
 Este documento es una guía pedagógica integral para profesores, formadores y divulgadores que deseen impartir sesiones prácticas, visuales y rigurosas sobre Redes Neuronales y Modelos de Lenguaje (LLMs) utilizando **NeuroLab**.
 
 ---

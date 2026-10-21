@@ -1,6 +1,7 @@
 {
-  "name": "redes-neuronales",
-  "version": "0.0.0",
+  "name": "neurolab",
+  "version": "1.0.0",
+  "description": "Interactive Neural Network Playground & Deep Learning Studio with Real-World Cases",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,6 +9,20 @@
     "build": "vite build",
     "preview": "vite preview"
   },
+  "keywords": [
+    "neural-networks",
+    "deep-learning",
+    "machine-learning",
+    "educational",
+    "playground",
+    "cnn",
+    "rnn",
+    "llm",
+    "transformers",
+    "interactive"
+  ],
+  "author": "Javier Ballesteros",
+  "license": "MIT",
   "devDependencies": {
     "vite": "^8.3.4"
   }

@@ -103,6 +103,12 @@ body {
   box-shadow: var(--glow-cyan);
 }
 
+.brand-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .brand-title {
   font-size: 1.35rem;
   font-weight: 800;
@@ -110,6 +116,21 @@ body {
   background: linear-gradient(90deg, #ffffff 40%, var(--accent-cyan));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+.badge-version {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(0, 242, 254, 0.1);
+  color: var(--accent-cyan);
+  border: 1px solid rgba(0, 242, 254, 0.3);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
 }
 
 .brand-subtitle {
