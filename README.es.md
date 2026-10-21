@@ -3,7 +3,7 @@
 <div align="center">
 
 [![Versión](https://img.shields.io/badge/versión-1.0.0-blue.svg)](https://github.com/javierb507/Neurolab/releases)
-[![Licencia: MIT](https://img.shields.io/badge/Licencia-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Licencia: GPL-3.0](https://img.shields.io/badge/Licencia-GPL--3.0-blue.svg)](./LICENSE)
 [![Idiomas](https://img.shields.io/badge/Idiomas-ES%20%7C%20EN-cyan.svg)](#-internacionalización-i18n)
 [![Vite](https://img.shields.io/badge/Vite-8.3-646CFF.svg)](https://vitejs.dev/)
 
@@ -125,4 +125,4 @@ Abre en tu navegador:
 ---
 
 ## 📄 Licencia
-Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](./LICENSE) para más información.
+Este proyecto está bajo la Licencia Pública General de GNU v3.0 (GPL-3.0). Consulta el archivo [LICENSE](./LICENSE) para más información.

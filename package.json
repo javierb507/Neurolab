@@ -22,7 +22,7 @@
     "interactive"
   ],
   "author": "Javier Ballesteros",
-  "license": "MIT",
+  "license": "GPL-3.0-or-later",
   "devDependencies": {
     "vite": "^8.3.4"
   }

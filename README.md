@@ -3,7 +3,7 @@
 <div align="center">
 
 [![Release](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/javierb507/Neurolab/releases)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](./LICENSE)
 [![Languages](https://img.shields.io/badge/Languages-EN%20%7C%20ES-cyan.svg)](#-internationalization-i18n)
 [![Build](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
 [![Vite](https://img.shields.io/badge/Vite-8.3-646CFF.svg)](https://vitejs.dev/)
@@ -160,7 +160,7 @@ Redes_neuronales/
 ├── README.es.md               # Documentación en Español
 ├── TEACHER_GUIDE.md           # Pedagogical guide for teachers (English)
 ├── GUIA_PROFESOR.md           # Manual didáctico del profesor (Español)
-├── LICENSE                    # MIT License
+├── LICENSE                    # GNU General Public License v3.0 (GPL-3.0)
 ├── public/                    # Static assets
 └── src/
     ├── main.js                # App bootstrap & event coordination
@@ -194,7 +194,7 @@ Redes_neuronales/
 ---
 
 ## 📄 License
-This project is open-source under the [MIT License](./LICENSE).
+This project is open-source under the [GNU General Public License v3.0 (GPL-3.0)](./LICENSE).
 
 ---
 
