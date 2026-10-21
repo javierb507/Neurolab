@@ -1,8 +1,4 @@
-/**
- * Visualizador de Frontera de Decisión 2D (Decision Boundary Heatmap)
- * Renderiza el espacio de predicción continua, los puntos de datos reales con unidades de dominio,
- * y permite interactuar haciendo clic para evaluar casos de prueba personalizados en tiempo real.
- */
+import { t, getLang, onLangChange } from '../i18n/index.js';
 
 export class DecisionBoundaryVisualizer {
   constructor(containerEl, onCustomProbeClick) {
@@ -10,11 +6,16 @@ export class DecisionBoundaryVisualizer {
     this.onCustomProbeClick = onCustomProbeClick;
     this.showTestData = true;
     this.discretize = false;
-    this.customProbe = null; // { x1, x2, realX1, realX2, pred }
+    this.customProbe = null;
     this.hoveredPoint = null;
 
-    this.gridResolution = 55; // 55x55 grid for crisp 60fps rendering
+    this.gridResolution = 55;
     this.initDOM();
+
+    onLangChange(() => {
+      this.initDOM();
+      this.renderCurrent();
+    });
   }
 
   initDOM() {
@@ -23,18 +24,18 @@ export class DecisionBoundaryVisualizer {
         <div class="boundary-header">
           <div class="boundary-title">
             <i class="fa-solid fa-chart-area"></i>
-            <span>Frontera de Decisión en Vivo</span>
+            <span>${t('boundary.title')}</span>
           </div>
           <div class="boundary-actions">
-            <label class="toggle-control" title="Mostrar/ocultar puntos de evaluación (test)">
-              <input type="checkbox" id="chk-show-test" checked>
+            <label class="toggle-control" title="${t('boundary.testDataTitle')}">
+              <input type="checkbox" id="chk-show-test" ${this.showTestData ? 'checked' : ''}>
               <span class="toggle-slider"></span>
-              <span class="toggle-text">Datos Test</span>
+              <span class="toggle-text">${t('boundary.testDataToggle')}</span>
             </label>
-            <label class="toggle-control" title="Ver frontera nítida al 50% de probabilidad">
-              <input type="checkbox" id="chk-discretize">
+            <label class="toggle-control" title="${t('boundary.discretizeTitle')}">
+              <input type="checkbox" id="chk-discretize" ${this.discretize ? 'checked' : ''}>
               <span class="toggle-slider"></span>
-              <span class="toggle-text">Discretizar</span>
+              <span class="toggle-text">${t('boundary.discretizeToggle')}</span>
             </label>
           </div>
         </div>
@@ -46,21 +47,21 @@ export class DecisionBoundaryVisualizer {
         </div>
 
         <div class="axis-labels">
-          <div class="axis-x-label" id="axis-x-title">Característica X₁ (Eje horizontal)</div>
-          <div class="axis-y-label" id="axis-y-title">Característica X₂ (Eje vertical)</div>
+          <div class="axis-x-label" id="axis-x-title">${t('boundary.axisX', { name: 'X₁' })}</div>
+          <div class="axis-y-label" id="axis-y-title">${t('boundary.axisY', { name: 'X₂' })}</div>
         </div>
 
         <div class="boundary-footer-stats">
           <div class="stat-pill">
-            <span class="stat-label">Loss Entrenamiento:</span>
+            <span class="stat-label">${t('boundary.trainLoss')}</span>
             <span class="stat-val" id="metric-train-loss">0.000</span>
           </div>
           <div class="stat-pill">
-            <span class="stat-label">Loss Test:</span>
+            <span class="stat-label">${t('boundary.testLoss')}</span>
             <span class="stat-val" id="metric-test-loss">0.000</span>
           </div>
           <div class="stat-pill highlight">
-            <span class="stat-label">Precisión (Test Acc):</span>
+            <span class="stat-label">${t('boundary.testAcc')}</span>
             <span class="stat-val" id="metric-test-acc">0.0%</span>
           </div>
         </div>
@@ -137,14 +138,14 @@ export class DecisionBoundaryVisualizer {
     this.probeCard.style.display = 'block';
     this.probeCard.innerHTML = `
       <div class="probe-card-header">
-        <span class="badge-probe"><i class="fa-solid fa-bullseye"></i> Caso de Prueba Personalizado</span>
+        <span class="badge-probe"><i class="fa-solid fa-bullseye"></i> ${t('boundary.probeTitle')}</span>
         <button class="btn-close-probe" id="btn-close-probe">&times;</button>
       </div>
       <div class="probe-body">
         <div class="probe-field"><strong>${p1Name}:</strong> ${probe.realX1} ${p1Unit}</div>
         <div class="probe-field"><strong>${p2Name}:</strong> ${probe.realX2} ${p2Unit}</div>
         <div class="probe-prediction" style="border-left: 3px solid ${classInfo.color};">
-          <div class="pred-label">Predicción de la Red:</div>
+          <div class="pred-label">${t('boundary.predictionLabel')}</div>
           <div class="pred-val" style="color: ${classInfo.color};">${classInfo.symbol} ${classInfo.label} (${confidence}%)</div>
         </div>
       </div>

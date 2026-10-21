@@ -1,11 +1,15 @@
-/**
- * Gráfico interactivo en tiempo real de Curvas de Pérdida (Loss) y Precisión (Accuracy)
- */
+import { t, onLangChange } from '../i18n/index.js';
 
 export class LossChart {
   constructor(containerEl) {
     this.container = containerEl;
+    this.lastLossHistory = null;
     this.initDOM();
+
+    onLangChange(() => {
+      this.initDOM();
+      if (this.lastLossHistory) this.render(this.lastLossHistory);
+    });
   }
 
   initDOM() {
@@ -14,11 +18,11 @@ export class LossChart {
         <div class="chart-header">
           <div class="chart-title">
             <i class="fa-solid fa-chart-line"></i>
-            <span>Curva de Convergencia (Loss)</span>
+            <span>${t('lossChart.title')}</span>
           </div>
           <div class="chart-legend">
-            <span class="legend-chip train"><span class="chip-color"></span> Train Loss</span>
-            <span class="legend-chip test"><span class="chip-color"></span> Test Loss</span>
+            <span class="legend-chip train"><span class="chip-color"></span> ${t('lossChart.trainLoss')}</span>
+            <span class="legend-chip test"><span class="chip-color"></span> ${t('lossChart.testLoss')}</span>
           </div>
         </div>
         <canvas id="loss-canvas" width="380" height="130"></canvas>
@@ -30,6 +34,7 @@ export class LossChart {
   }
 
   render(lossHistory) {
+    this.lastLossHistory = lossHistory;
     if (!this.canvas || !lossHistory || lossHistory.length < 2) {
       this.clear();
       return;

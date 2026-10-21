@@ -9,11 +9,12 @@ import { RNNVisualizer } from './components/rnnVisualizer.js';
 import { LLMVisualizer } from './components/llmVisualizer.js';
 import { AcademyGuide } from './components/academyGuide.js';
 import { sounds } from './components/soundEffects.js';
+import { getLang, setLang, t, onLangChange, applyStaticTranslations } from './i18n/index.js';
 
 /**
  * NeuroLab App Controller
  * Orquesta los módulos de la aplicación, el bucle de entrenamiento,
- * la visualización reactiva y los casos reales.
+ * la visualización reactiva y los casos reales con soporte bilingüe (ES / EN).
  */
 class NeuroLabApp {
   constructor() {
@@ -53,6 +54,7 @@ class NeuroLabApp {
     this.initDOM();
     this.initModules();
     this.bindEvents();
+    this.applyLanguage();
     this.renderAll();
   }
 
@@ -83,15 +85,17 @@ class NeuroLabApp {
 
   updateProblemStoryUI() {
     const p = this.currentProblem;
+    const isEn = getLang() === 'en';
     document.getElementById('problem-cat-badge').textContent = p.category;
     document.getElementById('problem-title').textContent = p.name;
     document.getElementById('problem-desc').textContent = `${p.story} ${p.insight}`;
 
+    const rangePrefix = isEn ? 'Typical range:' : 'Rango típico:';
     document.getElementById('feat-1-name').textContent = p.feature1.name;
-    document.getElementById('feat-1-range').textContent = `Rango típico: ${p.feature1.normalRange} (Total: ${p.feature1.min}-${p.feature1.max} ${p.feature1.unit})`;
+    document.getElementById('feat-1-range').textContent = `${rangePrefix} ${p.feature1.normalRange} (Total: ${p.feature1.min}-${p.feature1.max} ${p.feature1.unit})`;
 
     document.getElementById('feat-2-name').textContent = p.feature2.name;
-    document.getElementById('feat-2-range').textContent = `Rango típico: ${p.feature2.normalRange} (Total: ${p.feature2.min}-${p.feature2.max} ${p.feature2.unit})`;
+    document.getElementById('feat-2-range').textContent = `${rangePrefix} ${p.feature2.normalRange} (Total: ${p.feature2.min}-${p.feature2.max} ${p.feature2.unit})`;
 
     // Leyenda de clases
     const legendEl = document.getElementById('problem-classes-legend');
@@ -100,6 +104,58 @@ class NeuroLabApp {
         <span>${c.symbol}</span> <strong>${c.label}</strong>
       </div>
     `).join('');
+  }
+
+  updateDropdowns() {
+    // Learning Rate options
+    const lrSelect = document.getElementById('select-lr');
+    if (lrSelect) {
+      const curLr = lrSelect.value;
+      const opts = t('controls.lrOptions');
+      if (opts) {
+        lrSelect.innerHTML = Object.entries(opts).map(([val, label]) => `
+          <option value="${val}" ${val === curLr ? 'selected' : ''}>${label}</option>
+        `).join('');
+      }
+    }
+
+    // Activation options
+    const actSelect = document.getElementById('select-activation');
+    if (actSelect) {
+      const curAct = actSelect.value;
+      const opts = t('controls.actOptions');
+      if (opts) {
+        actSelect.innerHTML = Object.entries(opts).map(([val, label]) => `
+          <option value="${val}" ${val === curAct ? 'selected' : ''}>${label}</option>
+        `).join('');
+      }
+    }
+
+    // Regularization options
+    const regSelect = document.getElementById('select-reg');
+    if (regSelect) {
+      const curReg = regSelect.value;
+      const opts = t('controls.regOptions');
+      if (opts) {
+        regSelect.innerHTML = Object.entries(opts).map(([val, label]) => `
+          <option value="${val}" ${val === curReg ? 'selected' : ''}>${label}</option>
+        `).join('');
+      }
+    }
+
+    // Play/Pause button text
+    const playText = document.getElementById('play-text');
+    if (playText) {
+      playText.textContent = this.isTraining ? t('controls.pause') : t('controls.train');
+    }
+  }
+
+  applyLanguage() {
+    applyStaticTranslations();
+    this.updateDropdowns();
+    this.initDOM();
+    this.updateProblemStoryUI();
+    this.renderAll();
   }
 
   initModules() {
@@ -156,84 +212,113 @@ class NeuroLabApp {
       });
     });
 
+    // Toggle de Idioma (ES <-> EN)
+    const langBtn = document.getElementById('btn-lang-toggle');
+    const langLabel = document.getElementById('lang-current-label');
+    const updateLangBtn = () => {
+      const cur = getLang();
+      langLabel.textContent = cur === 'es' ? 'EN' : 'ES';
+      langBtn.title = cur === 'es' ? 'Switch to English' : 'Cambiar a Español';
+    };
+    updateLangBtn();
+
+    langBtn.addEventListener('click', () => {
+      sounds.playClick();
+      const newLang = getLang() === 'es' ? 'en' : 'es';
+      setLang(newLang);
+      updateLangBtn();
+      this.applyLanguage();
+    });
+
     // Play / Pause
     const playBtn = document.getElementById('btn-play-pause');
     playBtn.addEventListener('click', () => {
       sounds.playClick();
-      this.toggleTraining();
+      this.togglePlay();
     });
 
-    // Step 1 época
-    document.getElementById('btn-step').addEventListener('click', () => {
-      if (this.isTraining) this.stopTraining();
+    // Paso a paso (Step)
+    const stepBtn = document.getElementById('btn-step');
+    stepBtn.addEventListener('click', () => {
       sounds.playStep();
+      if (this.isTraining) this.stopTraining();
       this.trainOneStep();
       this.renderAll();
     });
 
-    // Reset Pesos
-    document.getElementById('btn-reset').addEventListener('click', () => {
+    // Reset red
+    const resetBtn = document.getElementById('btn-reset');
+    resetBtn.addEventListener('click', () => {
       sounds.playClick();
       this.stopTraining();
-      this.network.initWeights();
+      this.network.reset();
       this.network.computeMetrics(this.trainData, this.testData);
       this.renderAll();
     });
 
-    // Hiperparámetros
+    // Learning Rate
     document.getElementById('select-lr').addEventListener('change', (e) => {
       sounds.playClick();
-      this.network.learningRate = parseFloat(e.target.value);
+      const lr = parseFloat(e.target.value);
+      this.network.updateConfig({ learningRate: lr });
     });
 
+    // Activation
     document.getElementById('select-activation').addEventListener('change', (e) => {
       sounds.playClick();
-      this.network.updateConfig({ activation: e.target.value });
+      const act = e.target.value;
+      this.network.updateConfig({ activation: act });
       this.renderAll();
     });
 
+    // Regularization
     document.getElementById('select-reg').addEventListener('change', (e) => {
       sounds.playClick();
-      this.network.updateConfig({ regularization: e.target.value });
+      const reg = e.target.value;
+      this.network.updateConfig({ regularization: reg });
     });
 
+    // Regularization Rate
     document.getElementById('select-reg-rate').addEventListener('change', (e) => {
       sounds.playClick();
-      this.network.updateConfig({ regularizationRate: parseFloat(e.target.value) });
+      const regRate = parseFloat(e.target.value);
+      this.network.updateConfig({ regularizationRate: regRate });
     });
 
-    // Ruido
+    // Slider de Ruido
     const noiseSlider = document.getElementById('slider-noise');
+    const noiseDisplay = document.getElementById('noise-display');
     noiseSlider.addEventListener('input', (e) => {
-      const val = parseInt(e.target.value, 10);
-      document.getElementById('noise-display').textContent = `${val}%`;
-      this.noise = val / 100;
+      this.noise = parseInt(e.target.value) / 100;
+      noiseDisplay.textContent = `${e.target.value}%`;
       this.initData();
       this.renderAll();
     });
 
-    // Ratio Train/Test
+    // Slider de Ratio Train/Test
     const ratioSlider = document.getElementById('slider-ratio');
+    const ratioDisplay = document.getElementById('ratio-display');
     ratioSlider.addEventListener('input', (e) => {
-      const val = parseInt(e.target.value, 10);
-      document.getElementById('ratio-display').textContent = `${val}% / ${100 - val}%`;
-      this.trainRatio = val / 100;
+      const trainPct = parseInt(e.target.value);
+      const testPct = 100 - trainPct;
+      this.trainRatio = trainPct / 100;
+      ratioDisplay.textContent = `${trainPct}% / ${testPct}%`;
       this.initData();
       this.renderAll();
     });
 
-    // Batch size buttons
-    const batchBtns = document.querySelectorAll('.btn-batch');
-    batchBtns.forEach(btn => {
+    // Botones de Batch Size
+    const batchButtons = document.querySelectorAll('.btn-batch');
+    batchButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         sounds.playClick();
-        batchBtns.forEach(b => b.classList.remove('active'));
+        batchButtons.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        this.batchSize = parseInt(btn.getAttribute('data-batch'), 10);
+        this.batchSize = parseInt(btn.getAttribute('data-batch'));
       });
     });
 
-    // Regenerar datos
+    // Botón de Regenerar Datos
     document.getElementById('btn-regenerate-data').addEventListener('click', () => {
       sounds.playClick();
       this.initData();
@@ -330,8 +415,11 @@ class NeuroLabApp {
     this.updateProblemStoryUI();
     this.initData();
 
-    // Actualizar tipo de problema en la red
+    // Actualizar tipo de salida en la red
     this.network.updateConfig({ problemType: this.currentProblem.type });
+    this.network.reset();
+    this.network.computeMetrics(this.trainData, this.testData);
+
     this.renderAll();
   }
 
@@ -341,31 +429,29 @@ class NeuroLabApp {
 
     if (action === 'addLayer') {
       if (hidden.length < 5) {
-        hidden.push(3); // Nueva capa con 3 neuronas por defecto
+        hidden.push(4); // Capa nueva con 4 neuronas por defecto
       }
     } else if (action === 'removeLayer') {
       if (hidden.length > 0) {
         hidden.pop();
       }
-    } else if (action === 'addNeuron') {
-      if (layerIdx >= 0 && layerIdx < hidden.length) {
-        if (hidden[layerIdx] < 8) {
-          hidden[layerIdx] += 1;
-        }
+    } else if (action === 'addNeuron' && layerIdx !== undefined) {
+      if (hidden[layerIdx] < 8) {
+        hidden[layerIdx]++;
       }
-    } else if (action === 'removeNeuron') {
-      if (layerIdx >= 0 && layerIdx < hidden.length) {
-        if (hidden[layerIdx] > 1) {
-          hidden[layerIdx] -= 1;
-        }
+    } else if (action === 'removeNeuron' && layerIdx !== undefined) {
+      if (hidden[layerIdx] > 1) {
+        hidden[layerIdx]--;
       }
     }
 
     this.network.updateConfig({ hiddenLayers: hidden });
+    this.network.reset();
+    this.network.computeMetrics(this.trainData, this.testData);
     this.renderAll();
   }
 
-  toggleTraining() {
+  togglePlay() {
     if (this.isTraining) {
       this.stopTraining();
     } else {
@@ -381,7 +467,7 @@ class NeuroLabApp {
 
     btn.classList.add('playing');
     icon.className = 'fa-solid fa-pause';
-    text.textContent = 'Pausar';
+    text.textContent = t('controls.pause');
 
     let lastStepTime = 0;
     const loop = (timestamp) => {
@@ -413,7 +499,7 @@ class NeuroLabApp {
 
     btn.classList.remove('playing');
     icon.className = 'fa-solid fa-play';
-    text.textContent = 'Entrenar';
+    text.textContent = t('controls.train');
   }
 
   trainOneStep() {

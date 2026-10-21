@@ -1,6 +1,7 @@
+import { getLang, onLangChange, t } from '../i18n/index.js';
+
 /**
- * Módulo Didáctico de Redes Recurrentes (RNN/LSTM) y Transformers
- * Explica cómo las redes con memoria procesan texto, lenguaje y series temporales paso a paso.
+ * Módulo Didáctico de Redes Recurrentes (RNN/LSTM) y Transformers con Soporte Bilingüe
  */
 
 export class RNNVisualizer {
@@ -8,53 +9,73 @@ export class RNNVisualizer {
     this.container = containerEl;
     this.currentStep = 0;
     this.isPlaying = false;
+    this.playTimer = null;
 
-    // Escenario de procesamiento de lenguaje clínico / sentimiento
-    this.sentenceTokens = [
-      { word: 'Paciente', val: 0.1, desc: 'Sujeto neutro inicial' },
-      { word: 'presenta', val: 0.2, desc: 'Verbo de observación clínica' },
-      { word: 'fiebre', val: 0.8, desc: 'Síntoma: Estado oculto sube a nivel de ALERTA' },
-      { word: 'y dolor', val: 0.95, desc: 'Agravamiento: Memoria interna acumula alta preocupación' },
-      { word: 'pero', val: 0.4, desc: 'Conjunción adversativa: Cambia el rumbo semántico' },
-      { word: 'el análisis', val: 0.2, desc: 'Entrada de evidencia diagnóstica' },
-      { word: 'descartó', val: -0.8, desc: 'Negación clave: Neutraliza los síntomas anteriores' },
-      { word: 'infección.', val: -0.9, desc: 'Conclusión: La memoria clasifica como "Bajo Riesgo"' }
-    ];
+    this.tokensData = {
+      es: [
+        { word: 'Paciente', val: 0.1, desc: 'Sujeto neutro inicial' },
+        { word: 'presenta', val: 0.2, desc: 'Verbo de observación clínica' },
+        { word: 'fiebre', val: 0.8, desc: 'Síntoma: Estado oculto sube a nivel de ALERTA' },
+        { word: 'y dolor', val: 0.95, desc: 'Agravamiento: Memoria interna acumula alta preocupación' },
+        { word: 'pero', val: 0.4, desc: 'Conjunción adversativa: Cambia el rumbo semántico' },
+        { word: 'el análisis', val: 0.2, desc: 'Entrada de evidencia diagnóstica' },
+        { word: 'descartó', val: -0.8, desc: 'Negación clave: Neutraliza los síntomas anteriores' },
+        { word: 'infección.', val: -0.9, desc: 'Conclusión: La memoria clasifica como "Bajo Riesgo"' }
+      ],
+      en: [
+        { word: 'Patient', val: 0.1, desc: 'Initial neutral subject' },
+        { word: 'presents', val: 0.2, desc: 'Clinical observation verb' },
+        { word: 'fever', val: 0.8, desc: 'Symptom: Hidden state jumps to ALERT level' },
+        { word: 'and pain', val: 0.95, desc: 'Worsening: Memory accumulates high medical concern' },
+        { word: 'but', val: 0.4, desc: 'Adversative conjunction: Shifts semantic trajectory' },
+        { word: 'lab tests', val: 0.2, desc: 'Introduction of diagnostic evidence' },
+        { word: 'ruled out', val: -0.8, desc: 'Key negation: Neutralizes previous alarm symptoms' },
+        { word: 'infection.', val: -0.9, desc: 'Conclusion: Memory classifies as "Low Risk"' }
+      ]
+    };
 
     this.initDOM();
     this.render();
+
+    onLangChange(() => {
+      this.initDOM();
+      this.render();
+    });
+  }
+
+  get sentenceTokens() {
+    return this.tokensData[getLang()] || this.tokensData.es;
   }
 
   initDOM() {
+    const isEn = getLang() === 'en';
+    const compCards = t('rnn.compCards') || [];
+
     this.container.innerHTML = `
       <div class="rnn-section">
         <div class="module-intro">
-          <div class="intro-badge"><i class="fa-solid fa-clock-rotate-left"></i> Memoria y Secuencias Temporales</div>
-          <h2>Redes Recurrentes (RNN) vs. Transformers</h2>
-          <p>
-            Una red densa (MLP) no tiene noción del orden ni del tiempo: procesa cada dato como un evento aislado.
-            Las <strong>Redes Recurrentes (RNN)</strong> tienen un bucle de retroalimentación interna llamado 
-            <strong>Estado Oculto (Hidden State h<sub>t</sub>)</strong> que transporta la memoria del pasado hacia el futuro.
-          </p>
+          <div class="intro-badge"><i class="fa-solid fa-clock-rotate-left"></i> ${t('rnn.badge')}</div>
+          <h2>${t('rnn.title')}</h2>
+          <p>${t('rnn.desc')}</p>
         </div>
 
         <div class="rnn-controls-bar">
           <div class="rnn-step-ctrls">
             <button class="btn-primary" id="btn-rnn-play">
-              <i class="fa-solid fa-play"></i> Reproducir Secuencia
+              <i class="fa-solid fa-play"></i> <span id="btn-rnn-play-text">${t('rnn.playSeq')}</span>
             </button>
             <button class="btn-secondary" id="btn-rnn-prev">
-              <i class="fa-solid fa-backward-step"></i> Anterior
+              <i class="fa-solid fa-backward-step"></i> ${t('rnn.prevBtn')}
             </button>
             <button class="btn-secondary" id="btn-rnn-next">
-              Siguiente <i class="fa-solid fa-forward-step"></i>
+              ${t('rnn.nextBtn')} <i class="fa-solid fa-forward-step"></i>
             </button>
             <button class="btn-secondary" id="btn-rnn-reset">
-              <i class="fa-solid fa-rotate-left"></i> Reiniciar
+              <i class="fa-solid fa-rotate-left"></i> ${t('rnn.resetBtn')}
             </button>
           </div>
           <div class="rnn-step-counter">
-            Paso: <strong id="rnn-step-display">1 / 8</strong>
+            ${t('rnn.stepLabel')} <strong id="rnn-step-display">1 / 8</strong>
           </div>
         </div>
 
@@ -65,16 +86,16 @@ export class RNNVisualizer {
         <div class="rnn-architecture-unfolded">
           <div class="rnn-card-stage">
             <div class="rnn-node-box input-box">
-              <div class="box-tag">Palabra Entrada (x<sub>t</sub>)</div>
-              <div class="box-val" id="rnn-cur-word">Paciente</div>
+              <div class="box-tag">${t('rnn.tagInput')}</div>
+              <div class="box-val" id="rnn-cur-word">...</div>
             </div>
             <i class="fa-solid fa-arrow-down rnn-flow-arrow"></i>
             <div class="rnn-node-box cell-box">
-              <div class="box-tag">Célula Recurrente (RNN Cell)</div>
+              <div class="box-tag">${t('rnn.tagCell')}</div>
               <div class="box-formula">h<sub>t</sub> = tanh(W<sub>hh</sub> · h<sub>t-1</sub> + W<sub>xh</sub> · x<sub>t</sub> + b)</div>
               <div class="memory-meter-container">
                 <div class="memory-meter-label">
-                  <span>Nivel de Alarma en Memoria (h<sub>t</sub>):</span>
+                  <span>${t('rnn.alarmLabel')}</span>
                   <span id="rnn-mem-val" class="mem-percent">0%</span>
                 </div>
                 <div class="memory-meter-bar">
@@ -84,8 +105,8 @@ export class RNNVisualizer {
             </div>
             <i class="fa-solid fa-arrow-down rnn-flow-arrow"></i>
             <div class="rnn-node-box output-box">
-              <div class="box-tag">Predicción en tiempo t (ŷ<sub>t</sub>)</div>
-              <div class="box-val" id="rnn-cur-pred">Evaluación Estable</div>
+              <div class="box-tag">${t('rnn.tagOutput')}</div>
+              <div class="box-val" id="rnn-cur-pred">...</div>
             </div>
           </div>
 
@@ -93,34 +114,24 @@ export class RNNVisualizer {
           <div class="rnn-insight-card">
             <div class="insight-header">
               <i class="fa-solid fa-brain"></i>
-              <span>¿Qué ocurre en este instante?</span>
+              <span>${t('rnn.insightTitle')}</span>
             </div>
             <div class="insight-body" id="rnn-step-insight">
-              Cargando paso...
+              ...
             </div>
           </div>
         </div>
 
         <!-- Comparativa Didáctica: MLP vs RNN vs Transformer -->
         <div class="comparison-cards-grid">
-          <div class="comp-card">
-            <div class="comp-icon"><i class="fa-solid fa-network-wired"></i></div>
-            <h4>Perceptrón Multicapa (MLP)</h4>
-            <div class="comp-tag">Sin Memoria</div>
-            <p>Lee todas las palabras a la vez o de forma aislada. No sabe si "descartó" vino antes o después de "infección".</p>
-          </div>
-          <div class="comp-card featured">
-            <div class="comp-icon"><i class="fa-solid fa-repeat"></i></div>
-            <h4>Red Recurrente (RNN / LSTM)</h4>
-            <div class="comp-tag active">Memoria Secuencial</div>
-            <p>Lee palabra por palabra paso a paso. Problema: En frases muy largas, los primeros recuerdos tienden a olvidarse (Vanishing Gradient).</p>
-          </div>
-          <div class="comp-card">
-            <div class="comp-icon"><i class="fa-solid fa-bolt"></i></div>
-            <h4>Transformer (Atención)</h4>
-            <div class="comp-tag modern">Auto-Atención Directa</div>
-            <p>La arquitectura de ChatGPT: conecta todas las palabras entre sí simultáneamente sin necesidad de procesar una por una, permitiendo comprender contextos gigantescos.</p>
-          </div>
+          ${compCards.map((c, idx) => `
+            <div class="comp-card ${idx === 1 ? 'featured' : ''}">
+              <div class="comp-icon"><i class="fa-solid ${idx === 0 ? 'fa-network-wired' : (idx === 1 ? 'fa-repeat' : 'fa-bolt')}"></i></div>
+              <h4>${c.title}</h4>
+              <div class="comp-tag ${idx === 1 ? 'active' : (idx === 2 ? 'modern' : '')}">${c.tag}</div>
+              <p>${c.desc}</p>
+            </div>
+          `).join('')}
         </div>
       </div>
     `;
@@ -137,33 +148,33 @@ export class RNNVisualizer {
   }
 
   togglePlay() {
-    if (this.isPlaying) {
-      this.stopPlay();
-    } else {
-      this.isPlaying = true;
-      const btn = this.container.querySelector('#btn-rnn-play');
-      btn.innerHTML = `<i class="fa-solid fa-pause"></i> Pausar`;
-      btn.classList.add('btn-warning');
+    this.isPlaying = !this.isPlaying;
+    const btnText = this.container.querySelector('#btn-rnn-play-text');
+    const playBtn = this.container.querySelector('#btn-rnn-play');
 
-      this.timer = setInterval(() => {
-        if (this.currentStep < this.sentenceTokens.length - 1) {
-          this.currentStep++;
-          this.render();
+    if (this.isPlaying) {
+      if (btnText) btnText.textContent = t('rnn.pauseSeq');
+      playBtn.classList.add('playing');
+      this.playTimer = setInterval(() => {
+        if (this.currentStep >= this.sentenceTokens.length - 1) {
+          this.currentStep = 0;
         } else {
-          this.stopPlay();
+          this.currentStep++;
         }
-      }, 1000);
+        this.render();
+      }, 1400);
+    } else {
+      this.stopPlay();
     }
   }
 
   stopPlay() {
     this.isPlaying = false;
-    clearInterval(this.timer);
-    const btn = this.container.querySelector('#btn-rnn-play');
-    if (btn) {
-      btn.innerHTML = `<i class="fa-solid fa-play"></i> Reproducir Secuencia`;
-      btn.classList.remove('btn-warning');
-    }
+    const btnText = this.container.querySelector('#btn-rnn-play-text');
+    const playBtn = this.container.querySelector('#btn-rnn-play');
+    if (btnText) btnText.textContent = t('rnn.playSeq');
+    if (playBtn) playBtn.classList.remove('playing');
+    if (this.playTimer) clearInterval(this.playTimer);
   }
 
   nextStep() {
@@ -183,74 +194,80 @@ export class RNNVisualizer {
   }
 
   render() {
-    const curToken = this.sentenceTokens[this.currentStep];
-    const total = this.sentenceTokens.length;
+    const tokens = this.sentenceTokens;
+    if (this.currentStep >= tokens.length) this.currentStep = 0;
+    const cur = tokens[this.currentStep];
 
-    // Actualizar contador
-    this.container.querySelector('#rnn-step-display').textContent = `${this.currentStep + 1} / ${total}`;
+    // 1. Contador
+    const counterEl = this.container.querySelector('#rnn-step-display');
+    if (counterEl) counterEl.textContent = `${this.currentStep + 1} / ${tokens.length}`;
 
-    // Renderizar timeline de tokens
+    // 2. Timeline de Palabras
     const timeline = this.container.querySelector('#tokens-timeline');
-    timeline.innerHTML = '';
-    this.sentenceTokens.forEach((tok, idx) => {
-      const chip = document.createElement('div');
-      chip.className = `token-chip ${idx === this.currentStep ? 'current' : (idx < this.currentStep ? 'passed' : '')}`;
-      chip.innerHTML = `
-        <span class="tok-idx">t=${idx + 1}</span>
-        <span class="tok-word">${tok.word}</span>
-      `;
-      chip.addEventListener('click', () => {
-        this.stopPlay();
-        this.currentStep = idx;
-        this.render();
+    if (timeline) {
+      timeline.innerHTML = tokens.map((tk, idx) => {
+        let cls = 'token-pill';
+        if (idx === this.currentStep) cls += ' active';
+        else if (idx < this.currentStep) cls += ' passed';
+        return `
+          <div class="${cls}" data-idx="${idx}">
+            <span class="tk-idx">t=${idx + 1}</span>
+            <span class="tk-word">${tk.word}</span>
+          </div>
+        `;
+      }).join('');
+
+      timeline.querySelectorAll('.token-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+          this.stopPlay();
+          this.currentStep = parseInt(pill.getAttribute('data-idx'));
+          this.render();
+        });
       });
-      timeline.appendChild(chip);
-    });
-
-    // Calcular estado de memoria acumulada hasta este paso
-    let memScore = 0;
-    for (let i = 0; i <= this.currentStep; i++) {
-      // Decaimiento del pasado (0.8) + nueva palabra
-      memScore = memScore * 0.75 + this.sentenceTokens[i].val * 0.45;
     }
-    memScore = Math.max(-1, Math.min(1, memScore));
 
-    // Nivel de alarma en porcentaje (0 a 100%)
-    const alarmPct = Math.round(((memScore + 1) / 2) * 100);
+    // 3. Nodos Unfolded
+    const wordEl = this.container.querySelector('#rnn-cur-word');
+    if (wordEl) wordEl.textContent = `"${cur.word}"`;
 
-    this.container.querySelector('#rnn-cur-word').textContent = `"${curToken.word}"`;
-    this.container.querySelector('#rnn-mem-val').textContent = `${alarmPct}%`;
+    const memValEl = this.container.querySelector('#rnn-mem-val');
+    const memFillEl = this.container.querySelector('#rnn-mem-fill');
     
-    const fillEl = this.container.querySelector('#rnn-mem-fill');
-    fillEl.style.width = `${alarmPct}%`;
-    if (alarmPct > 65) {
-      fillEl.style.backgroundColor = '#ef4444'; // Rojo alarma
-    } else if (alarmPct > 40) {
-      fillEl.style.backgroundColor = '#f59e0b'; // Amarillo alerta
-    } else {
-      fillEl.style.backgroundColor = '#10b981'; // Verde tranquilidad
+    // Normalizar val [-1, 1] a [0, 100%]
+    const percent = Math.round(((cur.val + 1) / 2) * 100);
+    if (memValEl) memValEl.textContent = `${percent}%`;
+    if (memFillEl) {
+      memFillEl.style.width = `${percent}%`;
+      if (cur.val > 0.6) {
+        memFillEl.style.background = '#ef4444'; // Rojo alarma
+      } else if (cur.val < 0) {
+        memFillEl.style.background = '#10b981'; // Verde seguro
+      } else {
+        memFillEl.style.background = '#00f2fe'; // Cian
+      }
     }
 
-    // Predicción textual en tiempo t
-    let predText = 'Estado Estable / Sin anomalía';
-    if (alarmPct > 70) predText = '⚠️ ALERTA MÉDICA: Riesgo de Urgencia';
-    else if (alarmPct > 45) predText = '🔍 Observación: Síntomas moderados';
-    else predText = '✅ Pronóstico Favorable: Sin signos de alarma';
+    const predEl = this.container.querySelector('#rnn-cur-pred');
+    if (predEl) {
+      if (cur.val > 0.6) {
+        predEl.innerHTML = `<span style="color: #ef4444; font-weight: 800;">${t('rnn.alertEval')}</span>`;
+      } else if (cur.val < -0.3) {
+        predEl.innerHTML = `<span style="color: #10b981; font-weight: 800;">${t('rnn.lowRiskEval')}</span>`;
+      } else {
+        predEl.innerHTML = `<span style="color: #38bdf8;">${t('rnn.stableEval')}</span>`;
+      }
+    }
 
-    this.container.querySelector('#rnn-cur-pred').textContent = predText;
-
-    // Texto descriptivo del paso
+    // 4. Insight box
     const insightEl = this.container.querySelector('#rnn-step-insight');
-    insightEl.innerHTML = `
-      <div class="insight-token-title">Palabra procesada: <strong>"${curToken.word}"</strong></div>
-      <p>${curToken.desc}</p>
-      <div class="insight-math-note">
-        <strong>Efecto del Estado Oculto (h<sub>t</sub>):</strong> 
-        La célula combina la memoria previa acumulada con la nueva palabra "${curToken.word}". 
-        ${this.currentStep >= 6 
-          ? 'Nota cómo la palabra "descartó" disminuye drásticamente el nivel de alarma, anulando la preocupación de "fiebre" y "dolor". Esto demuestra por qué el orden secuencial es vital.' 
-          : 'Avanza hacia las siguientes palabras para ver cómo se transforma la memoria.'}
-      </div>
-    `;
+    if (insightEl) {
+      insightEl.innerHTML = `
+        <p><strong>Token recibido:</strong> <code>"${cur.word}"</code></p>
+        <p class="insight-p">${cur.desc}</p>
+        <div class="math-subnote">
+          Estado oculto previo (h<sub>t-1</sub>) combinado con la nueva palabra produce un nuevo estado h<sub>t</sub> = <strong>${cur.val.toFixed(2)}</strong>.
+        </div>
+      `;
+    }
   }
 }

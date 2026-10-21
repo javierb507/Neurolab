@@ -201,6 +201,22 @@ body {
   border-color: rgba(255, 255, 255, 0.2);
 }
 
+.btn-lang-toggle {
+  font-weight: 700;
+  color: var(--accent-cyan);
+  border-color: rgba(0, 242, 254, 0.25);
+  background: rgba(0, 242, 254, 0.08);
+  min-width: 65px;
+  justify-content: center;
+}
+
+.btn-lang-toggle:hover {
+  background: rgba(0, 242, 254, 0.16);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 12px rgba(0, 242, 254, 0.25);
+  transform: translateY(-1px);
+}
+
 /* ==========================================================================
    Contenido Principal y Vistas
    ========================================================================== */

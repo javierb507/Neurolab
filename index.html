@@ -4,14 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NeuroLab - Playground Interactivo de Redes Neuronales con Casos Reales</title>
-  <meta name="description" content="Aprende y experimenta visualmente cómo funciona una red neuronal con problemas del mundo real: medicina, finanzas, coches autónomos, visión por computador (CNN) y secuencias temporales (RNN).">
+  <meta name="description" content="Playground didáctico de Deep Learning con casos reales: medicina, ciberseguridad, vehículos autónomos y control de calidad. Explora MLP, CNN, RNN y Transformers.">
   
-  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <!-- Tipografía moderna Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- FontAwesome 6 Free -->
+  <!-- FontAwesome Iconos -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   
   <link rel="stylesheet" href="/src/style.css">
@@ -24,8 +24,8 @@
         <i class="fa-solid fa-brain"></i>
       </div>
       <div>
-        <h1 class="brand-title">NeuroLab</h1>
-        <span class="brand-subtitle">Playground de Inteligencia Artificial & Casos Reales</span>
+        <h1 class="brand-title" data-i18n="brand.title">NeuroLab</h1>
+        <span class="brand-subtitle" data-i18n="brand.subtitle">Playground de Inteligencia Artificial & Casos Reales</span>
       </div>
     </div>
 
@@ -33,34 +33,40 @@
     <nav class="nav-tabs" role="tablist">
       <button class="nav-tab active" data-tab="mlp" id="tab-btn-mlp" role="tab" aria-selected="true">
         <i class="fa-solid fa-network-wired"></i>
-        <span>Playground MLP</span>
+        <span data-i18n="nav.mlp">Playground MLP</span>
       </button>
       <button class="nav-tab" data-tab="cnn" id="tab-btn-cnn" role="tab" aria-selected="false">
         <i class="fa-solid fa-eye"></i>
-        <span>Visión CNN</span>
+        <span data-i18n="nav.cnn">Visión CNN</span>
       </button>
       <button class="nav-tab" data-tab="rnn" id="tab-btn-rnn" role="tab" aria-selected="false">
         <i class="fa-solid fa-clock-rotate-left"></i>
-        <span>Secuencias RNN</span>
+        <span data-i18n="nav.rnn">Secuencias RNN</span>
       </button>
       <button class="nav-tab" data-tab="llm" id="tab-btn-llm" role="tab" aria-selected="false">
         <i class="fa-solid fa-comments"></i>
-        <span>Tokens & LLM</span>
+        <span data-i18n="nav.llm">Tokens & LLM</span>
       </button>
       <button class="nav-tab" data-tab="academy" id="tab-btn-academy" role="tab" aria-selected="false">
         <i class="fa-solid fa-graduation-cap"></i>
-        <span>Academia & Retos</span>
+        <span data-i18n="nav.academy">Academia & Retos</span>
       </button>
     </nav>
 
     <!-- Botones de Acción Globales -->
     <div class="header-actions">
+      <!-- Selector de Idioma (ES / EN) -->
+      <button id="btn-lang-toggle" class="btn-outline-sm btn-lang-toggle" title="Switch Language / Cambiar Idioma">
+        <i class="fa-solid fa-globe"></i>
+        <span id="lang-current-label">EN</span>
+      </button>
+
       <button id="btn-sound-toggle" class="btn-icon" title="Activar/Silenciar sonido de simulación">
         <i class="fa-solid fa-volume-high" id="sound-icon"></i>
       </button>
       <button id="btn-quick-guide" class="btn-outline-sm" title="Guía rápida para principiantes">
         <i class="fa-solid fa-circle-question"></i>
-        <span>¿Cómo empezar?</span>
+        <span data-i18n="header.quickGuide">¿Cómo empezar?</span>
       </button>
     </div>
   </header>
@@ -76,17 +82,17 @@
         <div class="sim-ctrl-group">
           <button id="btn-play-pause" class="btn-play" title="Iniciar / Pausar entrenamiento continuo">
             <i class="fa-solid fa-play" id="play-icon"></i>
-            <span id="play-text">Entrenar</span>
+            <span id="play-text" data-i18n="controls.train">Entrenar</span>
           </button>
           <button id="btn-step" class="btn-step" title="Ejecutar exactamente 1 época paso a paso">
             <i class="fa-solid fa-forward-step"></i>
-            <span>Paso a Paso</span>
+            <span data-i18n="controls.step">Paso a Paso</span>
           </button>
           <button id="btn-reset" class="btn-reset" title="Reiniciar pesos de la red a valores aleatorios">
             <i class="fa-solid fa-rotate-left"></i>
           </button>
           <div class="epoch-indicator">
-            <span class="epoch-label">Época:</span>
+            <span class="epoch-label" data-i18n="controls.epoch">Época:</span>
             <span class="epoch-number" id="epoch-counter">0</span>
           </div>
         </div>
@@ -94,42 +100,42 @@
         <div class="hyperparam-group">
           <!-- Selector de Tasa de Aprendizaje -->
           <div class="param-item">
-            <label for="select-lr">Learning Rate (α):</label>
+            <label for="select-lr" data-i18n="controls.lrLabel">Learning Rate (α):</label>
             <select id="select-lr" class="custom-select">
-              <option value="0.001">0.001 (Lento y seguro)</option>
-              <option value="0.01">0.01 (Moderado)</option>
-              <option value="0.03" selected>0.03 (Recomendado)</option>
-              <option value="0.08">0.08 (Rápido)</option>
-              <option value="0.2">0.20 (Agresivo)</option>
-              <option value="0.8">0.80 (Inestable)</option>
+              <option value="0.001">0.001</option>
+              <option value="0.01">0.01</option>
+              <option value="0.03" selected>0.03</option>
+              <option value="0.08">0.08</option>
+              <option value="0.2">0.20</option>
+              <option value="0.8">0.80</option>
             </select>
           </div>
 
           <!-- Selector de Activación -->
           <div class="param-item">
-            <label for="select-activation">Activación:</label>
+            <label for="select-activation" data-i18n="controls.actLabel">Activación:</label>
             <select id="select-activation" class="custom-select">
-              <option value="relu" selected>ReLU (Estándar)</option>
-              <option value="leakyRelu">Leaky ReLU (Anti-muerte)</option>
-              <option value="tanh">Tanh (Simétrica)</option>
-              <option value="sigmoid">Sigmoide (Probabilística)</option>
-              <option value="linear">Lineal (Sin curvatura)</option>
+              <option value="relu" selected>ReLU</option>
+              <option value="leakyRelu">Leaky ReLU</option>
+              <option value="tanh">Tanh</option>
+              <option value="sigmoid">Sigmoide</option>
+              <option value="linear">Lineal</option>
             </select>
           </div>
 
           <!-- Regularización -->
           <div class="param-item">
-            <label for="select-reg">Regularización:</label>
+            <label for="select-reg" data-i18n="controls.regLabel">Regularización:</label>
             <select id="select-reg" class="custom-select">
-              <option value="none" selected>Ninguna</option>
-              <option value="l2">L2 (Ridge - Suaviza pesos)</option>
-              <option value="l1">L1 (Lasso - Pesos cero)</option>
+              <option value="none" selected>None</option>
+              <option value="l2">L2 (Ridge)</option>
+              <option value="l1">L1 (Lasso)</option>
             </select>
           </div>
 
           <!-- Tasa de Regularización -->
           <div class="param-item">
-            <label for="select-reg-rate">Fuerza Reg (λ):</label>
+            <label for="select-reg-rate" data-i18n="controls.regRateLabel">Fuerza Reg (λ):</label>
             <select id="select-reg-rate" class="custom-select">
               <option value="0.0001">0.0001</option>
               <option value="0.001" selected>0.001</option>
@@ -148,7 +154,7 @@
           <div class="panel-card problem-selector-card">
             <div class="card-title">
               <i class="fa-solid fa-database"></i>
-              <span>Problema del Mundo Real</span>
+              <span data-i18n="dataPanel.title">Problema del Mundo Real</span>
             </div>
             
             <div class="problem-chips" id="problem-chips-container">
@@ -184,7 +190,7 @@
             <div class="data-adjustments">
               <div class="range-control">
                 <div class="range-header">
-                  <span>Ruido en las mediciones:</span>
+                  <span data-i18n="dataPanel.noiseLabel">Ruido en las mediciones:</span>
                   <strong id="noise-display">10%</strong>
                 </div>
                 <input type="range" id="slider-noise" min="0" max="40" step="5" value="10">
@@ -192,24 +198,24 @@
 
               <div class="range-control">
                 <div class="range-header">
-                  <span>Reparto Entrenamiento / Test:</span>
+                  <span data-i18n="dataPanel.ratioLabel">Reparto Entrenamiento / Test:</span>
                   <strong id="ratio-display">70% / 30%</strong>
                 </div>
                 <input type="range" id="slider-ratio" min="50" max="90" step="10" value="70">
               </div>
 
               <div class="batch-control">
-                <span>Tamaño del Lote (Batch):</span>
+                <span data-i18n="dataPanel.batchLabel">Tamaño del Lote (Batch):</span>
                 <div class="batch-buttons">
                   <button class="btn-batch" data-batch="8">8</button>
                   <button class="btn-batch active" data-batch="16">16</button>
                   <button class="btn-batch" data-batch="32">32</button>
-                  <button class="btn-batch" data-batch="64">Todos</button>
+                  <button class="btn-batch" data-batch="64" data-i18n="dataPanel.batchAll">Todos</button>
                 </div>
               </div>
 
               <button class="btn-regenerate" id="btn-regenerate-data">
-                <i class="fa-solid fa-shuffle"></i> Regenerar Datos del Caso
+                <i class="fa-solid fa-shuffle"></i> <span data-i18n="dataPanel.regenerateBtn">Regenerar Datos del Caso</span>
               </button>
             </div>
 
@@ -217,9 +223,9 @@
             <div class="feature-engineering-card">
               <div class="card-subtitle">
                 <i class="fa-solid fa-wand-magic-sparkles"></i>
-                <span>Ingeniería de Características</span>
+                <span data-i18n="dataPanel.featEngTitle">Ingeniería de Características</span>
               </div>
-              <p class="feat-subtext">Selecciona qué transformaciones matemáticas de X₁ y X₂ recibe la red:</p>
+              <p class="feat-subtext" data-i18n="dataPanel.featEngSub">Selecciona qué transformaciones matemáticas de X₁ y X₂ recibe la red:</p>
               <div class="feature-toggles-grid">
                 <label class="feat-checkbox">
                   <input type="checkbox" id="feat-x1" checked>
@@ -243,11 +249,11 @@
                 </label>
                 <label class="feat-checkbox">
                   <input type="checkbox" id="feat-sin-x1">
-                  <span class="f-box">sen(X₁)</span>
+                  <span class="f-box">sin(X₁)</span>
                 </label>
                 <label class="feat-checkbox">
                   <input type="checkbox" id="feat-sin-x2">
-                  <span class="f-box">sen(X₂)</span>
+                  <span class="f-box">sin(X₂)</span>
                 </label>
               </div>
             </div>
@@ -304,7 +310,7 @@
       <div class="modal-header">
         <div class="modal-title">
           <i class="fa-solid fa-graduation-cap"></i>
-          <span>Guía Rápida: Cómo sacar el máximo partido a NeuroLab</span>
+          <span data-i18n="quickGuide.title">Guía Rápida: Cómo sacar el máximo partido a NeuroLab</span>
         </div>
         <button class="btn-close-modal" id="btn-close-modal">&times;</button>
       </div>
@@ -312,34 +318,34 @@
         <div class="guide-step">
           <div class="step-icon">1</div>
           <div class="step-text">
-            <strong>Elige un Problema Real:</strong>
-            <p>Selecciona a la izquierda si deseas diagnosticar diabetes, detectar fraudes bancarios o controlar el frenado de un coche autónomo. Cada problema tiene variables con significado médico o financiero real.</p>
+            <strong data-i18n="quickGuide.step1Title">Elige un Problema Real:</strong>
+            <p data-i18n="quickGuide.step1Desc">Selecciona a la izquierda si deseas diagnosticar diabetes, detectar fraudes bancarios o controlar el frenado de un coche autónomo. Cada problema tiene variables con significado médico o financiero real.</p>
           </div>
         </div>
         <div class="guide-step">
           <div class="step-icon">2</div>
           <div class="step-text">
-            <strong>Diseña la Red Neuronal:</strong>
-            <p>Usa los botones <code>[+]</code> y <code>[-]</code> en la columna central para añadir capas ocultas o neuronas. Mira cómo las líneas (sinapsis) cambian de grosor según su peso numérico.</p>
+            <strong data-i18n="quickGuide.step2Title">Diseña la Red Neuronal:</strong>
+            <p data-i18n="quickGuide.step2Desc">Usa los botones <code>[+]</code> y <code>[-]</code> en la columna central para añadir capas ocultas o neuronas. Mira cómo las líneas (sinapsis) cambian de grosor según su peso numérico.</p>
           </div>
         </div>
         <div class="guide-step">
           <div class="step-icon">3</div>
           <div class="step-text">
-            <strong>Dale al botón 'Entrenar' o 'Paso a Paso':</strong>
-            <p>Observa cómo la frontera de decisión a la derecha se curva en tiempo real adaptándose a los datos. Si quieres ver exactamente qué calcula una neurona en cualquier instante, ¡haz clic sobre ella para abrir el Microscopio Neuronal!</p>
+            <strong data-i18n="quickGuide.step3Title">Dale al botón 'Entrenar' o 'Paso a Paso':</strong>
+            <p data-i18n="quickGuide.step3Desc">Observa cómo la frontera de decisión a la derecha se curva en tiempo real adaptándose a los datos. Si quieres ver exactamente qué calcula una neurona en cualquier instante, ¡haz clic sobre ella para abrir el Microscopio Neuronal!</p>
           </div>
         </div>
         <div class="guide-step">
           <div class="step-icon">4</div>
           <div class="step-text">
-            <strong>Explora los otros tipos de redes:</strong>
-            <p>Usa la barra superior para explorar cómo una Red Convolucional (CNN) detecta bordes en imágenes médicas y cómo una Red Recurrente (RNN) analiza texto palabra por palabra con memoria interna.</p>
+            <strong data-i18n="quickGuide.step4Title">Explora los otros tipos de redes:</strong>
+            <p data-i18n="quickGuide.step4Desc">Usa la barra superior para explorar cómo una Red Convolucional (CNN) detecta bordes en imágenes médicas y cómo una Red Recurrente (RNN) analiza texto palabra por palabra con memoria interna.</p>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn-primary" id="btn-modal-got-it">¡Entendido, vamos a experimentar!</button>
+        <button class="btn-primary" id="btn-modal-got-it" data-i18n="quickGuide.gotItBtn">¡Entendido, vamos a experimentar!</button>
       </div>
     </div>
   </div>

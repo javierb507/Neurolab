@@ -1,7 +1,7 @@
+import { getLang, onLangChange, t } from '../i18n/index.js';
+
 /**
- * Módulo Didáctico e Interactivo de Redes Convolucionales (CNN)
- * Permite explorar cómo la visión por computadora detecta bordes, texturas
- * y patrones mediante convolución (Kernels 3x3), ReLU y Max Pooling.
+ * Módulo Didáctico e Interactivo de Redes Convolucionales (CNN) con Soporte Bilingüe
  */
 
 export class CNNVisualizer {
@@ -11,6 +11,7 @@ export class CNNVisualizer {
     this.currentScanX = 1;
     this.currentScanY = 1;
     this.isScanning = false;
+    this.scanInterval = null;
 
     // Imagen de prueba de 8x8 píxeles representando una anomalía médica / pieza industrial
     this.inputGrid = [
@@ -26,8 +27,6 @@ export class CNNVisualizer {
 
     this.kernels = {
       sobelX: {
-        name: 'Bordes Verticales (Sobel X)',
-        desc: 'Detecta transiciones bruscas de luz de izquierda a derecha (bordes verticales de fracturas o piezas).',
         matrix: [
           [-1, 0, 1],
           [-2, 0, 2],
@@ -35,8 +34,6 @@ export class CNNVisualizer {
         ]
       },
       sobelY: {
-        name: 'Bordes Horizontales (Sobel Y)',
-        desc: 'Detecta transiciones bruscas de luz de arriba a abajo (superficies horizontales).',
         matrix: [
           [-1, -2, -1],
           [ 0,  0,  0],
@@ -44,8 +41,6 @@ export class CNNVisualizer {
         ]
       },
       sharpen: {
-        name: 'Realce de Detalles (Sharpen)',
-        desc: 'Acentúa el contraste de los centros respecto a su entorno para aislar micro-defectos.',
         matrix: [
           [ 0, -1,  0],
           [-1,  5, -1],
@@ -53,8 +48,6 @@ export class CNNVisualizer {
         ]
       },
       outline: {
-        name: 'Detector Laplaciano (Contornos)',
-        desc: 'Filtro omnidireccional que aísla el contorno completo de cualquier objeto.',
         matrix: [
           [-1, -1, -1],
           [-1,  8, -1],
@@ -66,32 +59,42 @@ export class CNNVisualizer {
     this.initDOM();
     this.computeOutputs();
     this.render();
+
+    onLangChange(() => {
+      this.initDOM();
+      this.computeOutputs();
+      this.render();
+    });
+  }
+
+  getKernelName(key) {
+    return t(`cnn.kernels.${key}.name`);
+  }
+
+  getKernelDesc(key) {
+    return t(`cnn.kernels.${key}.desc`);
   }
 
   initDOM() {
     this.container.innerHTML = `
       <div class="cnn-section">
         <div class="module-intro">
-          <div class="intro-badge"><i class="fa-solid fa-eye"></i> Visión por Computadora</div>
-          <h2>¿Cómo ve el mundo una Red Neuronal Convolucional (CNN)?</h2>
-          <p>
-            A diferencia de las redes densas (MLP) que tratan cada píxel como un número aislado perdiendo la noción de espacio,
-            las <strong>CNN</strong> usan pequeños filtros deslizantes llamados <strong>Kernels</strong> para escanear la imagen
-            y extraer bordes, curvas y texturas, sin importar dónde aparezcan.
-          </p>
+          <div class="intro-badge"><i class="fa-solid fa-eye"></i> ${t('cnn.badge')}</div>
+          <h2>${t('cnn.title')}</h2>
+          <p>${t('cnn.desc')}</p>
         </div>
 
         <div class="cnn-controls-bar">
           <div class="ctrl-group">
-            <label>Seleccionar Filtro (Kernel 3&times;3):</label>
+            <label>${t('cnn.selectFilter')}</label>
             <div class="kernel-chips" id="kernel-chips"></div>
           </div>
           <div class="cnn-actions">
             <button class="btn-primary" id="btn-scan-step">
-              <i class="fa-solid fa-play"></i> Auto-Escanear
+              <i class="fa-solid fa-play"></i> <span id="btn-scan-text">${t('cnn.autoScan')}</span>
             </button>
             <button class="btn-secondary" id="btn-reset-scan">
-              <i class="fa-solid fa-rotate-left"></i> Reiniciar Posición
+              <i class="fa-solid fa-rotate-left"></i> ${t('cnn.resetPos')}
             </button>
           </div>
         </div>
@@ -104,14 +107,14 @@ export class CNNVisualizer {
             <div class="stage-header">
               <span class="stage-num">1</span>
               <div>
-                <h3>Imagen de Entrada</h3>
-                <span class="stage-sub">8&times;8 Píxeles (Escala de Grises)</span>
+                <h3>${t('cnn.stage1Title')}</h3>
+                <span class="stage-sub">${t('cnn.stage1Sub')}</span>
               </div>
             </div>
             <div class="matrix-canvas-wrapper">
               <canvas id="cnn-input-canvas" width="220" height="220"></canvas>
             </div>
-            <div class="stage-legend">Muestra una radiografía simulada con un nódulo central.</div>
+            <div class="stage-legend">${t('cnn.stage1Legend')}</div>
           </div>
 
           <!-- Operador Convolución y Kernel -->
@@ -129,14 +132,14 @@ export class CNNVisualizer {
             <div class="stage-header">
               <span class="stage-num">2</span>
               <div>
-                <h3>Mapa de Características</h3>
-                <span class="stage-sub">6&times;6 Convolución + ReLU</span>
+                <h3>${t('cnn.stage2Title')}</h3>
+                <span class="stage-sub">${t('cnn.stage2Sub')}</span>
               </div>
             </div>
             <div class="matrix-canvas-wrapper">
               <canvas id="cnn-fmap-canvas" width="220" height="220"></canvas>
             </div>
-            <div class="stage-legend">Resalta las zonas donde el filtro coincide con la imagen.</div>
+            <div class="stage-legend">${t('cnn.stage2Legend')}</div>
           </div>
 
           <!-- 3. Capa Max Pooling -->
@@ -144,20 +147,20 @@ export class CNNVisualizer {
             <div class="stage-header">
               <span class="stage-num">3</span>
               <div>
-                <h3>Max Pooling (2&times;2)</h3>
-                <span class="stage-sub">3&times;3 Reducción Espacial</span>
+                <h3>${t('cnn.stage3Title')}</h3>
+                <span class="stage-sub">${t('cnn.stage3Sub')}</span>
               </div>
             </div>
             <div class="matrix-canvas-wrapper">
               <canvas id="cnn-pool-canvas" width="220" height="220"></canvas>
             </div>
-            <div class="stage-legend">Reduce a la mitad el tamaño quedándose con el rasgo más fuerte.</div>
+            <div class="stage-legend">${t('cnn.stage3Legend')}</div>
           </div>
         </div>
 
         <!-- Desglose Matemático del píxel actual -->
         <div class="cnn-inspector-box" id="cnn-math-inspector">
-          <div class="insp-title"><i class="fa-solid fa-calculator"></i> Cálculo del Producto Convolucional en la posición actual:</div>
+          <div class="insp-title"><i class="fa-solid fa-calculator"></i> ${t('cnn.mathTitle')}</div>
           <div id="cnn-math-details" class="insp-details"></div>
         </div>
       </div>
@@ -165,10 +168,10 @@ export class CNNVisualizer {
 
     // Bind kernel chips
     const chipsContainer = this.container.querySelector('#kernel-chips');
-    for (const [key, k] of Object.entries(this.kernels)) {
+    for (const [key] of Object.entries(this.kernels)) {
       const chip = document.createElement('button');
       chip.className = `kernel-chip ${key === this.selectedKernelKey ? 'active' : ''}`;
-      chip.textContent = k.name;
+      chip.textContent = this.getKernelName(key);
       chip.addEventListener('click', () => {
         this.selectedKernelKey = key;
         chipsContainer.querySelectorAll('.kernel-chip').forEach(c => c.classList.remove('active'));
@@ -179,83 +182,36 @@ export class CNNVisualizer {
       chipsContainer.appendChild(chip);
     }
 
-    // Bind scan buttons
-    this.container.querySelector('#btn-scan-step').addEventListener('click', () => {
-      this.toggleAutoScan();
-    });
+    // Bind auto-scan and reset
+    this.container.querySelector('#btn-scan-step').addEventListener('click', () => this.toggleScan());
     this.container.querySelector('#btn-reset-scan').addEventListener('click', () => {
-      this.stopAutoScan();
       this.currentScanX = 1;
       this.currentScanY = 1;
       this.render();
     });
 
-    // Clic en canvas de entrada para mover el receptive field
+    // Make canvas interactive on click
     const inCanvas = this.container.querySelector('#cnn-input-canvas');
     inCanvas.addEventListener('click', (e) => {
       const rect = inCanvas.getBoundingClientRect();
-      const px = e.clientX - rect.left;
-      const py = e.clientY - rect.top;
-      const cellSize = inCanvas.width / 8;
-      const gx = Math.floor(px / cellSize);
-      const gy = Math.floor(py / cellSize);
-      
-      // Asegurar que la ventana 3x3 no se salga
-      this.currentScanX = Math.max(1, Math.min(6, gx));
-      this.currentScanY = Math.max(1, Math.min(6, gy));
+      const x = Math.floor(((e.clientX - rect.left) / rect.width) * 8);
+      const y = Math.floor(((e.clientY - rect.top) / rect.height) * 8);
+      // Mantener dentro del margen 3x3 válido
+      this.currentScanX = Math.max(1, Math.min(6, x));
+      this.currentScanY = Math.max(1, Math.min(6, y));
       this.render();
     });
   }
 
-  computeOutputs() {
-    const k = this.kernels[this.selectedKernelKey].matrix;
-    const img = this.inputGrid;
-    const fMap = [];
+  toggleScan() {
+    this.isScanning = !this.isScanning;
+    const btn = this.container.querySelector('#btn-scan-step');
+    const txt = this.container.querySelector('#btn-scan-text');
 
-    // Convolución 3x3 válida -> resultado 6x6
-    for (let y = 1; y < 7; y++) {
-      const row = [];
-      for (let x = 1; x < 7; x++) {
-        let sum = 0;
-        for (let ky = -1; ky <= 1; ky++) {
-          for (let kx = -1; kx <= 1; kx++) {
-            sum += img[y + ky][x + kx] * k[ky + 1][kx + 1];
-          }
-        }
-        // Activación ReLU
-        const activated = Math.max(0, sum);
-        row.push(activated);
-      }
-      fMap.push(row);
-    }
-    this.featureMap = fMap;
-
-    // Max Pooling 2x2 sobre el fMap 6x6 -> resultado 3x3
-    const pool = [];
-    for (let py = 0; py < 6; py += 2) {
-      const pRow = [];
-      for (let px = 0; px < 6; px += 2) {
-        const val1 = fMap[py][px];
-        const val2 = fMap[py][px + 1];
-        const val3 = fMap[py + 1][px];
-        const val4 = fMap[py + 1][px + 1];
-        pRow.push(Math.max(val1, val2, val3, val4));
-      }
-      pool.push(pRow);
-    }
-    this.poolMap = pool;
-  }
-
-  toggleAutoScan() {
     if (this.isScanning) {
-      this.stopAutoScan();
-    } else {
-      this.isScanning = true;
-      const btn = this.container.querySelector('#btn-scan-step');
-      btn.innerHTML = `<i class="fa-solid fa-pause"></i> Pausar Escaneo`;
-      btn.classList.add('btn-warning');
-
-      this.scanTimer = setInterval(() => {
+      txt.textContent = t('cnn.pauseScan');
+      btn.classList.add('playing');
+      this.scanInterval = setInterval(() => {
         this.currentScanX++;
         if (this.currentScanX > 6) {
           this.currentScanX = 1;
@@ -266,92 +222,120 @@ export class CNNVisualizer {
         }
         this.render();
       }, 350);
+    } else {
+      txt.textContent = t('cnn.autoScan');
+      btn.classList.remove('playing');
+      clearInterval(this.scanInterval);
     }
   }
 
-  stopAutoScan() {
-    this.isScanning = false;
-    clearInterval(this.scanTimer);
-    const btn = this.container.querySelector('#btn-scan-step');
-    btn.innerHTML = `<i class="fa-solid fa-play"></i> Auto-Escanear`;
-    btn.classList.remove('btn-warning');
+  computeOutputs() {
+    const k = this.kernels[this.selectedKernelKey].matrix;
+    
+    // Convolución 6x6
+    this.featureMap = [];
+    for (let y = 1; y <= 6; y++) {
+      const row = [];
+      for (let x = 1; x <= 6; x++) {
+        let sum = 0;
+        for (let ky = -1; ky <= 1; ky++) {
+          for (let kx = -1; kx <= 1; kx++) {
+            sum += this.inputGrid[y + ky][x + kx] * k[ky + 1][kx + 1];
+          }
+        }
+        row.push(Math.max(0, sum)); // ReLU
+      }
+      this.featureMap.push(row);
+    }
+
+    // Max Pooling 2x2 -> 3x3
+    this.pooledMap = [];
+    for (let py = 0; py < 6; py += 2) {
+      const row = [];
+      for (let px = 0; px < 6; px += 2) {
+        const poolVal = Math.max(
+          this.featureMap[py][px],
+          this.featureMap[py][px + 1],
+          this.featureMap[py + 1][px],
+          this.featureMap[py + 1][px + 1]
+        );
+        row.push(poolVal);
+      }
+      this.pooledMap.push(row);
+    }
   }
 
   render() {
-    const curKernel = this.kernels[this.selectedKernelKey];
-    this.container.querySelector('#kernel-desc').innerHTML = `
-      <strong>${curKernel.name}:</strong> ${curKernel.desc}
-    `;
+    // 1. Actualizar descripción y matriz de Kernel
+    const descEl = this.container.querySelector('#kernel-desc');
+    if (descEl) descEl.textContent = this.getKernelDesc(this.selectedKernelKey);
 
-    // Renderizar matriz visual del Kernel 3x3
     const kGrid = this.container.querySelector('#kernel-matrix-grid');
-    kGrid.innerHTML = '';
-    for (let r = 0; r < 3; r++) {
-      for (let c = 0; c < 3; c++) {
-        const val = curKernel.matrix[r][c];
-        const cell = document.createElement('div');
-        cell.className = `k-cell ${val > 0 ? 'pos' : (val < 0 ? 'neg' : 'zero')}`;
-        cell.textContent = val;
-        kGrid.appendChild(cell);
-      }
+    if (kGrid) {
+      const k = this.kernels[this.selectedKernelKey].matrix;
+      kGrid.innerHTML = k.flat().map(v => `
+        <div class="kernel-cell ${v > 0 ? 'pos' : (v < 0 ? 'neg' : 'zero')}">${v}</div>
+      `).join('');
     }
 
-    // 1. Dibujar Imagen de Entrada (8x8) con el Receptive Field resaltado
+    // 2. Dibujar Canvas de Entrada 8x8 con ventana de atención roja
     const inCanvas = this.container.querySelector('#cnn-input-canvas');
+    if (!inCanvas) return;
     const inCtx = inCanvas.getContext('2d');
-    const inCellSize = inCanvas.width / 8;
+    const cellSize = inCanvas.width / 8;
 
     inCtx.clearRect(0, 0, inCanvas.width, inCanvas.height);
     for (let y = 0; y < 8; y++) {
       for (let x = 0; x < 8; x++) {
         const val = this.inputGrid[y][x];
         inCtx.fillStyle = `rgb(${val}, ${val}, ${val})`;
-        inCtx.fillRect(x * inCellSize, y * inCellSize, inCellSize, inCellSize);
+        inCtx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+
         inCtx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-        inCtx.strokeRect(x * inCellSize, y * inCellSize, inCellSize, inCellSize);
+        inCtx.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
       }
     }
 
-    // Resaltar Ventana 3x3 Receptive Field
-    const sx = (this.currentScanX - 1) * inCellSize;
-    const sy = (this.currentScanY - 1) * inCellSize;
+    // Resaltar Receptive Field 3x3 actual
+    const rfX = (this.currentScanX - 1) * cellSize;
+    const rfY = (this.currentScanY - 1) * cellSize;
     inCtx.strokeStyle = '#00f2fe';
     inCtx.lineWidth = 3;
-    inCtx.strokeRect(sx, sy, inCellSize * 3, inCellSize * 3);
+    inCtx.strokeRect(rfX, rfY, cellSize * 3, cellSize * 3);
     inCtx.fillStyle = 'rgba(0, 242, 254, 0.2)';
-    inCtx.fillRect(sx, sy, inCellSize * 3, inCellSize * 3);
+    inCtx.fillRect(rfX, rfY, cellSize * 3, cellSize * 3);
 
-    // 2. Dibujar Mapa de Características (6x6)
+    // 3. Dibujar Mapa de Características 6x6
     const fCanvas = this.container.querySelector('#cnn-fmap-canvas');
     const fCtx = fCanvas.getContext('2d');
     const fCellSize = fCanvas.width / 6;
-
-    // Encontrar max en fMap para normalizar brillo
-    let maxF = 1;
-    for (const row of this.featureMap) {
-      for (const v of row) if (v > maxF) maxF = v;
-    }
 
     fCtx.clearRect(0, 0, fCanvas.width, fCanvas.height);
     for (let y = 0; y < 6; y++) {
       for (let x = 0; x < 6; x++) {
         const val = this.featureMap[y][x];
-        const norm = Math.min(255, Math.round((val / maxF) * 255));
-        fCtx.fillStyle = `rgb(${norm}, ${Math.round(norm * 0.9)}, ${Math.round(norm * 0.4)})`;
+        const norm = Math.min(255, val / 4);
+        fCtx.fillStyle = `rgb(${norm}, ${norm * 0.7}, ${norm * 1.2})`;
         fCtx.fillRect(x * fCellSize, y * fCellSize, fCellSize, fCellSize);
-        fCtx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+
+        fCtx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
         fCtx.strokeRect(x * fCellSize, y * fCellSize, fCellSize, fCellSize);
+
+        fCtx.fillStyle = norm > 130 ? '#04101e' : '#ffffff';
+        fCtx.font = '10px monospace';
+        fCtx.textAlign = 'center';
+        fCtx.fillText(Math.round(val), x * fCellSize + fCellSize / 2, y * fCellSize + fCellSize / 2 + 3);
       }
     }
 
-    // Resaltar píxel calculado actual en Feature Map (currentScanX - 1, currentScanY - 1)
-    const curFx = (this.currentScanX - 1) * fCellSize;
-    const curFy = (this.currentScanY - 1) * fCellSize;
-    fCtx.strokeStyle = '#f59e0b';
-    fCtx.lineWidth = 2.5;
-    fCtx.strokeRect(curFx, curFy, fCellSize, fCellSize);
+    // Resaltar píxel calculado actual
+    const activeFX = (this.currentScanX - 1) * fCellSize;
+    const activeFY = (this.currentScanY - 1) * fCellSize;
+    fCtx.strokeStyle = '#ffd700';
+    fCtx.lineWidth = 3;
+    fCtx.strokeRect(activeFX, activeFY, fCellSize, fCellSize);
 
-    // 3. Dibujar Max Pooling (3x3)
+    // 4. Dibujar Max Pooling 3x3
     const pCanvas = this.container.querySelector('#cnn-pool-canvas');
     const pCtx = pCanvas.getContext('2d');
     const pCellSize = pCanvas.width / 3;
@@ -359,21 +343,22 @@ export class CNNVisualizer {
     pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
     for (let y = 0; y < 3; y++) {
       for (let x = 0; x < 3; x++) {
-        const val = this.poolMap[y][x];
-        const norm = Math.min(255, Math.round((val / maxF) * 255));
-        pCtx.fillStyle = `rgb(${Math.round(norm * 0.3)}, ${norm}, ${Math.round(norm * 0.8)})`;
+        const val = this.pooledMap[y][x];
+        const norm = Math.min(255, val / 4);
+        pCtx.fillStyle = `rgb(${norm * 0.5}, ${norm * 0.9}, ${norm})`;
         pCtx.fillRect(x * pCellSize, y * pCellSize, pCellSize, pCellSize);
+
         pCtx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
         pCtx.strokeRect(x * pCellSize, y * pCellSize, pCellSize, pCellSize);
 
-        pCtx.fillStyle = '#ffffff';
-        pCtx.font = '11px sans-serif';
+        pCtx.fillStyle = norm > 130 ? '#04101e' : '#ffffff';
+        pCtx.font = '12px monospace';
         pCtx.textAlign = 'center';
         pCtx.fillText(Math.round(val), x * pCellSize + pCellSize / 2, y * pCellSize + pCellSize / 2 + 4);
       }
     }
 
-    // 4. Detalle Matemático del Producto Punto
+    // 5. Detalle Matemático del Producto Punto
     this.renderMathDetails();
   }
 
@@ -398,16 +383,20 @@ export class CNNVisualizer {
 
     const activated = Math.max(0, sum);
     const detailsEl = this.container.querySelector('#cnn-math-details');
-    detailsEl.innerHTML = `
-      <div class="math-line">
-        <span>Producto Punto:</span> 
-        <code>∑ (Píxel &times; Kernel) = ${terms.slice(0, 5).join(' + ')} ... = <strong>${sum}</strong></code>
-      </div>
-      <div class="math-line">
-        <span>Función ReLU:</span> 
-        <code>max(0, ${sum}) = <strong class="res-num">${activated}</strong></code>
-        <span class="math-tag">Valor almacenado en el Feature Map en posición (${cx}, ${cy})</span>
-      </div>
-    `;
+    const isEn = getLang() === 'en';
+
+    if (detailsEl) {
+      detailsEl.innerHTML = `
+        <div class="math-line">
+          <span>${isEn ? 'Dot Product:' : 'Producto Punto:'}</span> 
+          <code>∑ (${isEn ? 'Pixel' : 'Píxel'} &times; Kernel) = ${terms.slice(0, 5).join(' + ')} ... = <strong>${sum}</strong></code>
+        </div>
+        <div class="math-line">
+          <span>${isEn ? 'ReLU Function:' : 'Función ReLU:'}</span> 
+          <code>max(0, ${sum}) = <strong class="res-num">${activated}</strong></code>
+          <span class="math-tag">${isEn ? `Stored in Feature Map at position (${cx}, ${cy})` : `Valor almacenado en el Feature Map en posición (${cx}, ${cy})`}</span>
+        </div>
+      `;
+    }
   }
 }

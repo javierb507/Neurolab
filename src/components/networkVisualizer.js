@@ -1,8 +1,4 @@
-/**
- * Visualizador interactivo de Arquitectura de Red Neuronal
- * Renderiza capas, neuronas, sinapsis con grosor según pesos, sesgos (bias)
- * y pulsos de señal interactivos. Permite inspeccionar cualquier neurona.
- */
+import { t } from '../i18n/index.js';
 
 export class NetworkVisualizer {
   constructor(containerEl, onNeuronClick, onArchitectureChange) {
@@ -21,15 +17,15 @@ export class NetworkVisualizer {
         <div class="vis-toolbar">
           <div class="vis-title">
             <i class="fa-solid fa-network-wired"></i>
-            <span>Arquitectura Sináptica en Vivo</span>
+            <span>${t('networkVis.title')}</span>
           </div>
           <div class="layer-global-controls">
-            <span class="ctrl-label">Capas Ocultas:</span>
-            <button id="btn-remove-layer" class="btn-sm" title="Quitar capa oculta">
+            <span class="ctrl-label">${t('networkVis.hiddenLayersLabel')}</span>
+            <button id="btn-remove-layer" class="btn-sm" title="${t('networkVis.removeLayerTitle')}">
               <i class="fa-solid fa-minus"></i>
             </button>
-            <span id="hidden-layers-count" class="layer-badge">2 capas</span>
-            <button id="btn-add-layer" class="btn-sm" title="Añadir capa oculta">
+            <span id="hidden-layers-count" class="layer-badge">${t('networkVis.layersBadge', { n: 2 })}</span>
+            <button id="btn-add-layer" class="btn-sm" title="${t('networkVis.addLayerTitle')}">
               <i class="fa-solid fa-plus"></i>
             </button>
           </div>
@@ -41,10 +37,10 @@ export class NetworkVisualizer {
         </div>
 
         <div class="vis-legend">
-          <div class="legend-item"><span class="legend-line pos"></span> Peso positivo (+)</div>
-          <div class="legend-item"><span class="legend-line neg"></span> Peso negativo (-)</div>
-          <div class="legend-item"><span class="legend-dot active"></span> Alta activación</div>
-          <div class="legend-item"><span class="legend-dot inspect"></span> Haz clic en una neurona para inspeccionar</div>
+          <div class="legend-item"><span class="legend-line pos"></span> ${t('networkVis.legendPos')}</div>
+          <div class="legend-item"><span class="legend-line neg"></span> ${t('networkVis.legendNeg')}</div>
+          <div class="legend-item"><span class="legend-dot active"></span> ${t('networkVis.legendActive')}</div>
+          <div class="legend-item"><span class="legend-dot inspect"></span> ${t('networkVis.legendInspect')}</div>
         </div>
       </div>
     `;
@@ -78,7 +74,7 @@ export class NetworkVisualizer {
     const width = this.svg.clientWidth || this.svg.parentElement.clientWidth || 650;
     const height = Math.max(380, this.svg.clientHeight || 380);
     this.svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-    this.layersCountBadge.textContent = `${network.hiddenLayers.length} capa${network.hiddenLayers.length === 1 ? '' : 's'}`;
+    this.layersCountBadge.textContent = t('networkVis.layersBadge', { n: network.hiddenLayers.length });
 
     const layerSizes = network.layerSizes;
     const numLayers = layerSizes.length;
@@ -149,11 +145,11 @@ export class NetworkVisualizer {
       let isHidden = false;
 
       if (l === 0) {
-        title = 'Entrada (Features)';
+        title = t('networkVis.inputLayer');
       } else if (l === numLayers - 1) {
-        title = 'Salida';
+        title = t('networkVis.outputLayer');
       } else {
-        title = `Oculta ${l}`;
+        title = t('networkVis.hiddenLayer', { n: l });
         isHidden = true;
       }
 
